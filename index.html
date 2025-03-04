@@ -2,6 +2,7 @@
   <html>
   <head>
   <style>
+  /* Styling for the game box */
   .box {
     background-color: #0d65d3;
     width: 25%;
@@ -14,12 +15,14 @@
     text-align: center;
   }
 
+  /* Styling for the grid of circles */
   .circle {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: .3rem;
   }
 
+  /* Styling for each circle */
   .circle div {
     background-color: white;
     border-radius: 50%;
@@ -29,6 +32,7 @@
     transition: background-color 0.5s ease, transform 0.2s ease;
   }
 
+  /* Animation for falling effect */
   .fall {
     animation: fall-animation 500ms;
   }
@@ -38,10 +42,12 @@
     to { transform: translateY(0); }
   }
 
+  /* Styling for highlighted circles */
   .highlight {
     opacity: 0.6;
   }
 
+  /* Styling for the turn indicator */
   #turn-indicator {
     font-size: 1.2rem;
     margin-bottom: 1rem;
@@ -55,6 +61,7 @@
   <div class="box">
     <div class="circle">
       <script>
+        // Generate 42 circles for the game grid
         for (let i = 1; i <= 42; i++) {
           document.write(`<div id="${i}" onclick="yourFunction(this)" onmouseover="highlightColumn(this)" onmouseout="removeHighlight(this)"></div>`);
         }
@@ -75,24 +82,30 @@
     audio.play();
     const col = (parseInt(element.id) - 1) % columns;
 
+    // Find the lowest empty row in the selected column
     const row = board.findLastIndex(r => !r[col]);
     if (row === -1) return; 
 
+    // Update the board and UI
     board[row][col] = currentPlayer;
     const cell = document.getElementById(row * columns + col + 1);
     cell.classList.add('fall');
     cell.style.backgroundColor = currentPlayer;
 
+    // Check for a win
     if (checkWin(row, col)) {
       document.getElementById('win-message').textContent = `${currentPlayer.toUpperCase()} Wins!`;
       document.getElementById('restart-btn').style.display = 'block';
       return;
     }
+
+    // Switch to the other player
     currentPlayer = currentPlayer === 'yellow' ? 'red' : 'yellow';
     document.getElementById('turn-indicator').textContent = `${currentPlayer.toUpperCase()}'s Turn`;
   }
 
   function resetGame() {
+    // Reset the game board and UI
     board = Array.from({ length: rows }, () => Array(columns).fill(null));
     document.querySelectorAll('.circle div').forEach(cell => {
       cell.style.backgroundColor = 'white';
@@ -105,11 +118,13 @@
   }
 
   function checkWin(row, col) {
+    // Check all directions for a win
     return [[1, 0], [0, 1], [1, 1], [1, -1]].some(([rD, cD]) => checkDirection(row, col, rD, cD));
   }
 
   function checkDirection(row, col, rowDir, colDir) {
     let count = 0;
+    // Check 7 cells in the specified direction
     for (let i = -3; i <= 3; i++) {
       const r = row + i * rowDir, c = col + i * colDir;
       count = (r >= 0 && r < rows && c >= 0 && c < columns && board[r][c] === currentPlayer) ? count + 1 : 0;
@@ -120,6 +135,7 @@
 
   function highlightColumn(element) {
     const col = (parseInt(element.id) - 1) % columns;
+    // Highlight all cells in the same column
     document.querySelectorAll('.circle div').forEach(cell => {
       if ((parseInt(cell.id) - 1) % columns === col) {
         cell.classList.add('highlight');
@@ -128,6 +144,7 @@
   }
 
   function removeHighlight(element) {
+    // Remove highlight from all cells
     document.querySelectorAll('.circle div').forEach(cell => {
       cell.classList.remove('highlight');
     });
