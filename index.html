@@ -1,0 +1,137 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <style>
+  .box {
+    background-color: #0d65d3;
+    width: 25%;
+    height: 50%;
+    margin: auto;
+    border-radius: 1.5rem;
+    font-weight: 700;
+    padding: 1rem;
+    min-width: 300px;
+    text-align: center;
+  }
+
+  .circle {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: .3rem;
+  }
+
+  .circle div {
+    background-color: white;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    transition: background-color 0.5s ease, transform 0.2s ease;
+  }
+
+  .fall {
+    animation: fall-animation 500ms;
+  }
+
+  @keyframes fall-animation {
+    from { transform: translateY(-300px); }
+    to { transform: translateY(0); }
+  }
+
+  .highlight {
+    opacity: 0.6;
+  }
+
+  #turn-indicator {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  </style>
+  </head>
+  <body>
+
+  <h1 style="text-align: center;">CONNECT 4 IN A ROW</h1>
+  <p id="turn-indicator" style="text-align: center;">Yellow's Turn</p>
+  <div class="box">
+    <div class="circle">
+      <script>
+        for (let i = 1; i <= 42; i++) {
+          document.write(`<div id="${i}" onclick="yourFunction(this)" onmouseover="highlightColumn(this)" onmouseout="removeHighlight(this)"></div>`);
+        }
+      </script>
+    </div>
+  </div>
+
+  <h2 id="win-message" style="text-align: center; color: red;"></h2>
+  <button id="restart-btn" onclick="resetGame()" style="display: none; margin: auto; display: block;">Restart Game</button>
+
+  <script>
+  let currentPlayer = 'yellow';
+  const columns = 7, rows = 6;
+  let board = Array.from({ length: rows }, () => Array(columns).fill(null));
+
+  function yourFunction(element) {
+    const audio = new Audio('click.mp3');
+    audio.play();
+    const col = (parseInt(element.id) - 1) % columns;
+
+    const row = board.findLastIndex(r => !r[col]);
+    if (row === -1) return; 
+
+    board[row][col] = currentPlayer;
+    const cell = document.getElementById(row * columns + col + 1);
+    cell.classList.add('fall');
+    cell.style.backgroundColor = currentPlayer;
+
+    if (checkWin(row, col)) {
+      document.getElementById('win-message').textContent = `${currentPlayer.toUpperCase()} Wins!`;
+      document.getElementById('restart-btn').style.display = 'block';
+      return;
+    }
+    currentPlayer = currentPlayer === 'yellow' ? 'red' : 'yellow';
+    document.getElementById('turn-indicator').textContent = `${currentPlayer.toUpperCase()}'s Turn`;
+  }
+
+  function resetGame() {
+    board = Array.from({ length: rows }, () => Array(columns).fill(null));
+    document.querySelectorAll('.circle div').forEach(cell => {
+      cell.style.backgroundColor = 'white';
+      cell.classList.remove('fall');
+    });
+    document.getElementById('win-message').textContent = '';
+    document.getElementById('restart-btn').style.display = 'none';
+    currentPlayer = 'yellow';
+    document.getElementById('turn-indicator').textContent = "Yellow's Turn";
+  }
+
+  function checkWin(row, col) {
+    return [[1, 0], [0, 1], [1, 1], [1, -1]].some(([rD, cD]) => checkDirection(row, col, rD, cD));
+  }
+
+  function checkDirection(row, col, rowDir, colDir) {
+    let count = 0;
+    for (let i = -3; i <= 3; i++) {
+      const r = row + i * rowDir, c = col + i * colDir;
+      count = (r >= 0 && r < rows && c >= 0 && c < columns && board[r][c] === currentPlayer) ? count + 1 : 0;
+      if (count === 4) return true;
+    }
+    return false;
+  }
+
+  function highlightColumn(element) {
+    const col = (parseInt(element.id) - 1) % columns;
+    document.querySelectorAll('.circle div').forEach(cell => {
+      if ((parseInt(cell.id) - 1) % columns === col) {
+        cell.classList.add('highlight');
+      }
+    });
+  }
+
+  function removeHighlight(element) {
+    document.querySelectorAll('.circle div').forEach(cell => {
+      cell.classList.remove('highlight');
+    });
+  }
+  </script>
+  </body>
+  </html>
